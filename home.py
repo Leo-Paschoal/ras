@@ -12,7 +12,9 @@ st.set_page_config(
 
 @st.cache_data
 def carregarDados():
-    df = pd.read_excel("./dadosComp/dadosCompletos.xlsx")
+    #df =pd.read_csv("./dadosComp/dadosCompletos.csv")
+    #df = pd.read_excel("./dadosComp/dadosCompletos.xlsx")
+    df = pd.read_excel("dadosCompletos.xlsx")
 
     return df
 
