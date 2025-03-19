@@ -25,8 +25,18 @@ if "dados" not in st.session_state:
 
 
 # TITULO DA PAGINA
-st.write("# DASHBOARD RAS - CBMERJ")
+#st.write("# DASHBOARD RAS - CBMERJ")
 
+st.markdown("""
+# Dashboard do Regime Adicional de Serviço (RAS)
+
+Este dashboard apresenta informações detalhadas sobre o **Regime Adicional de Serviço (RAS)** dos militares do **Corpo de Bombeiros Militar do Estado do Rio de Janeiro (CBMERJ)**. A gestão dos dados aqui exibidos é realizada pela **Subchefia Administrativa do Estado-Maior Geral (SubChAdm)** do CBMERJ, com o objetivo de fornecer maior transparência e controle sobre as operações realizadas no âmbito do RAS.
+
+Os dados disponíveis abrangem o período de **janeiro de 2023 a fevereiro de 2025**. Nossa equipe está comprometida em manter as informações sempre atualizadas, refletindo as atividades mais recentes. Além disso, estamos trabalhando para **ampliar o escopo temporal** do dashboard, integrando dados de períodos anteriores para uma análise ainda mais completa.
+
+Este espaço foi desenvolvido para auxiliar na **tomada de decisões estratégicas**, facilitar a **análise de custos** e promover a **eficiência administrativa**. Acreditamos que a disponibilização dessas informações é um passo importante para aprimorar a gestão e reforçar o compromisso do CBMERJ com a excelência no serviço público.
+""")
+#Caso tenha dúvidas ou sugestões, não hesite em entrar em contato. Continuamos a trabalhar para tornar este dashboard uma ferramenta cada vez mais **útil e relevante**.
 
 # # Define os Filtros
 

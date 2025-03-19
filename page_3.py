@@ -37,6 +37,14 @@ def remover_ano(especialidade):
         # Caso geral: remover tudo após a primeira barra
         return especialidade.split("/")[0]
 
+def formartaAnoIng(ano):
+    if ano > 70:
+        n = '19'+str(ano).zfill(2)
+    else:
+        n = '20'+str(ano).zfill(2)
+
+    return n
+
 
 st.sidebar.markdown("# Filtros")
 
@@ -75,10 +83,27 @@ dados_posto = dados_posto[dados_posto['POSTO/GRADUAÇÃO'] != "INSIRA UM RG VÁL
 dados_graduacao
 dados_posto
 
+# Contar os anos de ingresso
+dados_ingresso = dados['ANO_INGRESSO'].value_counts().reset_index()
+dados_ingresso.columns = ['ANO_INGRESSO', 'TOTAL']
+
+# Selecionar apenas o Top 10
+top_10_ingresso = dados_ingresso.head(5)
+top_10_ingresso
+total_linhas = len(dados)
+# Cálculo com formatação para 2 casas decimais
+percentual = (top_10_ingresso.iloc[0, 1] / total_linhas) * 100
+
+ano_ing = formartaAnoIng(top_10_ingresso.iloc[0, 0])
+
+# Usando round
+percentual_formatado = round(percentual, 2)
+st.write(f'Dos {total_linhas} servioços ofertados {top_10_ingresso.iloc[0, 1]} foram realizados por militares que ingressaram em {ano_ing}, percentualmente {percentual_formatado} %')
+
 total_militares = dados['RG (SEM UTILIZAÇÃO DE PONTO)'].nunique()
 prac = dados['CATEGORIA'].value_counts()
 prac
-st.write(f'Ao total já particitaram do programa {total_militares} militares, sendo ofertados {prac[0]} serviços para praças, {prac[1]} serviços para  of. int. e sub e {prac[2]} serviços para  of. superior.' )
+#st.write(f'Ao total já particitaram do programa {total_militares} militares, sendo ofertados {prac[0]} serviços para praças, {prac[1]} serviços para  of. int. e sub e {prac[2]} serviços para  of. superior.' )
 # Transformar a série em um DataFrame
 prac_df = prac.reset_index()
 

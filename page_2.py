@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from home import carregarDados
 
+
 st.set_page_config(
     page_title='SUBCHADM',
     layout='wide'
@@ -84,38 +85,45 @@ with secao1:
     st.plotly_chart(fig)
 
 with secao2:
-    col1, col2 = st.columns(2)
+    #col1, col2 = st.columns(2)
     
     
-    with col1:
-        soma_custos_por_setor = dados[["SETOR", "CUSTOS"]].groupby('SETOR')['CUSTOS'].sum().reset_index().sort_values(by='CUSTOS', ascending= True)
-        # Criar o gráfico de barras com Plotly
-        fig = px.bar(soma_custos_por_setor, 
-                     x='CUSTOS', 
-                     y='SETOR', 
-                     orientation='h', 
-                     title='Gráfico de SETORES x CUSTOS',
-                     text='CUSTOS')
-        # Ajustar a posição e o formato dos rótulos
-        fig.update_traces(textposition='outside',  # Exibe os rótulos fora das barras
-                          texttemplate='%{text:.0f}')  # Formata os valores com 2 casas decimais
-        
-        # Exibir o gráfico no Streamlit
-        st.plotly_chart(fig)
+#    with col1:
+    soma_custos_por_setor = dados[["SETOR", "CUSTOS"]].groupby('SETOR')['CUSTOS'].sum().reset_index().sort_values(by='CUSTOS', ascending= True)
+    # # Criar o gráfico de barras com Plotly
+    # fig = px.bar(soma_custos_por_setor, 
+    #              x='CUSTOS', 
+    #              y='SETOR', 
+    #              orientation='h', 
+    #              title='Gráfico de SETORES x CUSTOS',
+    #              text='CUSTOS')
+    # # Ajustar a posição e o formato dos rótulos
+    # fig.update_traces(textposition='outside',  # Exibe os rótulos fora das barras
+    #                   texttemplate='%{text:.0f}')  # Formata os valores com 2 casas decimais
+    
+    # # Exibir o gráfico no Streamlit
+    # st.plotly_chart(fig)
+    # Criar um DataFrame de exemplo
+
+    # Criar o gráfico de mapa em árvore (treemap) com Plotly
+    graficoArvore = px.treemap(soma_custos_por_setor, path=['SETOR'], values='CUSTOS', title='Setores x Custos')
+
+    # Exibir o gráfico no Streamlit
+    st.plotly_chart(graficoArvore)
 
 
     df_categoria = dados.groupby(['CATEGORIA'])['CUSTOS'].sum().reset_index()
 
-    with col2:
-        # Dados para o gráfico de pizza
-        labels = df_categoria['CATEGORIA']
-        sizes = df_categoria['CUSTOS']
+    # with col2:
+    #     # Dados para o gráfico de pizza
+    #     labels = df_categoria['CATEGORIA']
+    #     sizes = df_categoria['CUSTOS']
 
-        graf_categoria = go.Figure(data=[go.Pie(labels=labels, values=sizes, textinfo='label+percent',
-                                    insidetextorientation='radial'
-                                    )])
+    #     graf_categoria = go.Figure(data=[go.Pie(labels=labels, values=sizes, textinfo='label+percent',
+    #                                 insidetextorientation='radial'
+    #                                 )])
 
-        st.plotly_chart(graf_categoria)
+    #     st.plotly_chart(graf_categoria)
 
     #dados para a tabela
     df_top_unidades = dados[["LOCAL DO SERVIÇO", "CUSTOS"]].groupby("LOCAL DO SERVIÇO")["CUSTOS"].sum().reset_index().sort_values(by='CUSTOS', ascending=False)
