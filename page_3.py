@@ -3,23 +3,21 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from page_2 import formatar_moeda
-#from plotly.subplots import make_subplots
 
 st.set_page_config(
     page_title='SUBCHADM',
     layout='wide'
 )
 
-graduacao = ["SUBTEN BM","1 SGT BM","2 SGT BM","3 SGT BM","CB BM","SD BM"]
-posto =["CEL BM","TEN CEL BM","MAJ BM","CAP BM","1 TEN BM","2 TEN BM","ASP OF BM","CAD BM"]
+# graduacao = ["SUBTEN BM","1 SGT BM","2 SGT BM","3 SGT BM","CB BM","SD BM"]
+# posto =["CEL BM","TEN CEL BM","MAJ BM","CAP BM","1 TEN BM","2 TEN BM","ASP OF BM","CAD BM"]
 
 
 header = st.container()
 secao1 = st.container()
 secao2 = st.container()
 secao3 = st.container()
-
-# dados = carregarDados()
+secao4 = st.container()
 
 # Acessar os dados carregados
 dados = st.session_state.get("dados")
@@ -38,12 +36,10 @@ def remover_ano(especialidade):
         return especialidade.split("/")[0]
 
 def formartaAnoIng(ano):
-    if ano > 70:
-        n = '19'+str(ano).zfill(2)
-    else:
-        n = '20'+str(ano).zfill(2)
-
-    return n
+    if ano > 70:  # Anos maiores que 70 são do século 20 (1900s)
+        return int(f"19{ano:02}")
+    else:  # Anos menores ou iguais a 70 são do século 21 (2000s)
+        return int(f"20{ano:02}")
 
 
 st.sidebar.markdown("# Filtros")
@@ -80,8 +76,6 @@ dados_q_of = dados_q_of[dados_q_of['QUADRO/ESPECIALIDADE'] != "INSIRA UM RG VÁL
 dados_graduacao = dados_praca.groupby('POSTO/GRADUAÇÃO')['CUSTOS'].sum().reset_index().sort_values(by='CUSTOS', ascending= False)
 dados_posto = dados_of.groupby('POSTO/GRADUAÇÃO')['CUSTOS'].sum().reset_index().sort_values(by='CUSTOS', ascending= False)
 dados_posto = dados_posto[dados_posto['POSTO/GRADUAÇÃO'] != "INSIRA UM RG VÁLIDO"]
-dados_graduacao
-dados_posto
 
 # Contar os anos de ingresso
 dados_ingresso = dados['ANO_INGRESSO'].value_counts().reset_index()
@@ -89,8 +83,8 @@ dados_ingresso.columns = ['ANO_INGRESSO', 'TOTAL']
 
 # Selecionar apenas o Top 10
 top_10_ingresso = dados_ingresso.head(5)
-top_10_ingresso
 total_linhas = len(dados)
+
 # Cálculo com formatação para 2 casas decimais
 percentual = (top_10_ingresso.iloc[0, 1] / total_linhas) * 100
 
@@ -98,12 +92,11 @@ ano_ing = formartaAnoIng(top_10_ingresso.iloc[0, 0])
 
 # Usando round
 percentual_formatado = round(percentual, 2)
-st.write(f'Dos {total_linhas} servioços ofertados {top_10_ingresso.iloc[0, 1]} foram realizados por militares que ingressaram em {ano_ing}, percentualmente {percentual_formatado} %')
+#st.write(f'Dos {total_linhas} servioços ofertados {top_10_ingresso.iloc[0, 1]} foram realizados por militares que ingressaram em {ano_ing}, percentualmente {percentual_formatado} %')
 
 total_militares = dados['RG (SEM UTILIZAÇÃO DE PONTO)'].nunique()
 prac = dados['CATEGORIA'].value_counts()
-prac
-#st.write(f'Ao total já particitaram do programa {total_militares} militares, sendo ofertados {prac[0]} serviços para praças, {prac[1]} serviços para  of. int. e sub e {prac[2]} serviços para  of. superior.' )
+
 # Transformar a série em um DataFrame
 prac_df = prac.reset_index()
 
@@ -118,19 +111,37 @@ atividade.columns = ['ATIVIDADE', 'TOTAL']
 
 # Adicionar uma coluna com o percentual de cada atividade
 atividade['PERCENTUAL'] = (atividade['TOTAL'] / atividade['TOTAL'].sum())*100
-atividade
 
-#O MILITAR SE ENCONTRA EM GOZO DE FÉRIAS? 
-# Agrupar por ANO, MES e pela resposta de férias, contando as ocorrências
-# f_df = (
-#     dados.groupby('O MILITAR SE ENCONTRA EM GOZO DE FÉRIAS?')
-#     .size()
-#     .reset_index(name='TOTAL')
-# )
 ferias_df = dados['O MILITAR SE ENCONTRA EM GOZO DE FÉRIAS?'].value_counts().reset_index()
 ferias_df.columns = ['FERIAS', 'TOTAL']
-#O MILITAR SE ENCONTRA EM GOZO DE FÉRIAS? groupby('POSTO/GRADUAÇÃO')['CUSTOS'].sum().reset_index().sort_values(by='CUSTOS', ascending= False)
-ferias_df
+
+with header:
+    st.write("""# Perfil Profissional
+             
+             """)
+
+            # Dados para o gráfico de pizza
+    labels = prac_df['CATEGORIA']
+    sizes = prac_df['TOTAL']
+
+    graf_categoria = go.Figure(data=[go.Pie(labels=labels,
+                                            values=sizes,
+                                            textinfo='label+percent',
+                                            insidetextorientation='radial'
+                                )])
+    graf_categoria.update_layout(
+        title={
+                'text': 'Distribuição dos Custos por Categoria',
+                'y': 0.95,  # Posição do título no eixo vertical (1.0 é topo)
+                'x': 0.5,   # Centralizar título no eixo horizontal
+                'xanchor': 'center',
+                'yanchor': 'top'
+                },
+            margin=dict(t=100)  # Ajustar a margem superior (t = top)
+    )
+
+    st.plotly_chart(graf_categoria)
+    
 with secao1:
     col1, col2 = st.columns(2)
     
@@ -226,26 +237,49 @@ with secao2:
     st.plotly_chart(fig2)
 
 with secao3:
-    col3, col4 = st.columns(2)
 
-    with col3:
-        # Dados para o gráfico de pizza
-        labels = prac_df['CATEGORIA']
-        sizes = prac_df['TOTAL']
+    # Dados para o gráfico de pizza
+    labels2 = ferias_df['FERIAS']
+    sizes2 = ferias_df['TOTAL']
 
-        graf_categoria = go.Figure(data=[go.Pie(labels=labels, values=sizes, textinfo='label+percent',
-                                    insidetextorientation='radial'
-                                    )])
+    graf_categoria = go.Figure(data=[go.Pie(labels=labels2, values=sizes2, textinfo='label+percent',
+                                insidetextorientation='radial'
+                                )])
+    
+    graf_categoria.update_layout(
+        title={
+                'text': 'RAS com Militares de Férias',
+                'y': 0.95,  # Posição do título no eixo vertical (1.0 é topo)
+                'x': 0.5,   # Centralizar título no eixo horizontal
+                'xanchor': 'center',
+                'yanchor': 'top'
+                },
+            margin=dict(t=100)  # Ajustar a margem superior (t = top)
+    )
 
-        st.plotly_chart(graf_categoria)
+    st.plotly_chart(graf_categoria)
 
-    with col4:
-        # Dados para o gráfico de pizza
-        labels2 = ferias_df['FERIAS']
-        sizes2 = ferias_df['TOTAL']
 
-        graf_categoria = go.Figure(data=[go.Pie(labels=labels2, values=sizes2, textinfo='label+percent',
-                                    insidetextorientation='radial'
-                                    )])
+with secao4:
+    dados_ingresso["ANO_INGRESSO"] = dados_ingresso["ANO_INGRESSO"].apply(formartaAnoIng)
 
-        st.plotly_chart(graf_categoria)
+    # Criar o histograma com Plotly
+    histograma = px.histogram(
+        dados_ingresso,
+        x='ANO_INGRESSO',
+        y='TOTAL',
+        nbins=11,  # Número de bins (ajuste conforme necessário)
+        title='Distribuição dos RAS por Ano de Ingresso na Corporação',
+        labels={'ANO_INGRESSO': 'Ano de Ingresso'},  # Renomear rótulo do eixo x
+        text_auto=True  # Mostrar os valores de cada barra
+    )
+
+    # Ajustar o layout para melhorar a visualização
+    histograma.update_layout(
+        xaxis_title='Ano de Ingresso',
+        yaxis_title='Quantidade de RAS',
+        #bargap=0.1  # Espaço entre as barras
+    )
+
+    # Exibir o gráfico no Streamlit
+    st.plotly_chart(histograma)

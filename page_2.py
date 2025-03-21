@@ -105,8 +105,21 @@ with secao2:
     # st.plotly_chart(fig)
     # Criar um DataFrame de exemplo
 
+    # Formatando os custos no padrão de moeda brasileira
+    soma_custos_por_setor['CUSTOS_FORMATADOS'] = soma_custos_por_setor['CUSTOS'].apply(formatar_moeda)
+
     # Criar o gráfico de mapa em árvore (treemap) com Plotly
-    graficoArvore = px.treemap(soma_custos_por_setor, path=['SETOR'], values='CUSTOS', title='Setores x Custos')
+    graficoArvore = px.treemap(soma_custos_por_setor, 
+                               path=['SETOR'], 
+                               values='CUSTOS', 
+                               title='Setores x Custos',
+                               custom_data=['CUSTOS_FORMATADOS'])
+    
+    # Configurar os rótulos personalizados
+    graficoArvore.update_traces(
+        hovertemplate="<b>%{label}</b><br>Custo: %{customdata[0]}<extra></extra>",
+        textinfo="label+value"
+    )
 
     # Exibir o gráfico no Streamlit
     st.plotly_chart(graficoArvore)
@@ -138,6 +151,5 @@ with secao2:
                 st.column_config.ProgressColumn("Porcentagem", 
                                             format=" ",
                                             max_value= df_top_unidades["CUSTOS"].max())})
-        
         
 
