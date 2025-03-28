@@ -7,9 +7,11 @@ import pandas as pd
 
 st.set_page_config(
     page_title='SUBCHADM',
-    layout='wide'
+    layout='wide',
+    page_icon='image.png'
+    
 )
-
+#imagem = st.image('image.png')
 @st.cache_data
 def carregarDados():
     #df =pd.read_csv("./dadosComp/dadosCompletos.csv")

@@ -6,7 +6,8 @@ from page_2 import formatar_moeda
 
 st.set_page_config(
     page_title='SUBCHADM',
-    layout='wide'
+    layout='wide',
+    page_icon='image.png'
 )
 
 # graduacao = ["SUBTEN BM","1 SGT BM","2 SGT BM","3 SGT BM","CB BM","SD BM"]
@@ -22,6 +23,7 @@ secao4 = st.container()
 # Acessar os dados carregados
 dados = st.session_state.get("dados")
 
+# ***************** Inicio cria as funções ****************************************************
 def remover_ano(especialidade):
     # Verifica se o valor já foi processado (sem ano) ou não precisa ser alterado
     if "TEMP" in especialidade:
@@ -41,18 +43,24 @@ def formartaAnoIng(ano):
     else:  # Anos menores ou iguais a 70 são do século 21 (2000s)
         return int(f"20{ano:02}")
 
+# ***************** Fim cria as funções ****************************************************
+# Aplicar a função à coluna ESPECIALIDADE
+dados['QUADRO/ESPECIALIDADE'] = dados['QUADRO/ESPECIALIDADE'].apply(remover_ano)
 
+# ***************** Inicio que Define os Filtros ****************************************************
 st.sidebar.markdown("# Filtros")
-
-# Define os Filtros
 
 # verifica na planilha quais valores existem 
 setores = dados["SETOR"].unique()
 ano = dados['ANO'].unique()
+mes = dados['MES'].unique()
+qbmp = dados['QUADRO/ESPECIALIDADE'].unique()
 
 # cria os botões de multipla seleção
 lista_setores = st.sidebar.multiselect("Setores", setores, placeholder="Selecione o Setor")
 lista_ano = st.sidebar.multiselect("Anos", ano, placeholder="Selecione o Ano")
+lista_mes = st.sidebar.multiselect("Mes", mes, placeholder="Selecione o Mês")
+#lista_qbmp = st.sidebar.multiselect("QBMP", qbmp, placeholder="Selecione a QBMP")
 
 # filtra de acordo com o selecionado
 if lista_setores:
@@ -61,12 +69,26 @@ if lista_setores:
 if lista_ano:
     dados = dados[dados['ANO'].isin(lista_ano)]
 
+if lista_mes:
+    dados = dados[dados['MES'].isin(lista_mes)]
 
-# Aplicar a função à coluna ESPECIALIDADE
-dados['QUADRO/ESPECIALIDADE'] = dados['QUADRO/ESPECIALIDADE'].apply(remover_ano)
+# if lista_qbmp:
+#     dados = dados[dados['QUADRO/ESPECIALIDADE'].isin(lista_qbmp)]
+
+# ***************** Fim que Define os Filtros ****************************************************
+
+
 # Filtrar o DataFrame para manter apenas as linhas onde a coluna 'CATEGORIA' é 'PRAÇA'
 dados_praca = dados[dados['CATEGORIA'] == 'PRAÇA']
 dados_of = dados[(dados['CATEGORIA'] != 'PRAÇA')]
+
+# Contar a frequência de cada especialidade
+contagem = dados_praca['QUADRO/ESPECIALIDADE'].value_counts()
+# Somar as ocorrências de Q10 e TEM/10
+q10 = contagem.get('Q10', 0) + contagem.get('TEMP/10', 0)
+q00 = contagem.get('Q00', 0) + contagem.get('TEMP/00', 0)
+q06 = contagem.get('Q06', 0) + contagem.get('TEMP/06', 0) + contagem.get('Q11', 0) 
+
 
 # Agrupar pela especialidade e somar os custos
 dados_q_praca = dados_praca.groupby('QUADRO/ESPECIALIDADE')['CUSTOS'].sum().reset_index().sort_values(by='CUSTOS', ascending= False)
@@ -116,9 +138,7 @@ ferias_df = dados['O MILITAR SE ENCONTRA EM GOZO DE FÉRIAS?'].value_counts().re
 ferias_df.columns = ['FERIAS', 'TOTAL']
 
 with header:
-    st.write("""# Perfil Profissional
-             
-             """)
+    st.write("""# Perfil Profissional """)
 
             # Dados para o gráfico de pizza
     labels = prac_df['CATEGORIA']
@@ -159,7 +179,7 @@ with secao1:
                     st.column_config.ProgressColumn("Porcentagem", 
                                                 format=" ",
                                                 max_value= dados_q_praca["CUSTOS"].max())})
-
+        st.markdown(f'###### Totalizando {q00} serviços para Combatentes (Q00 e TEMP/00), {q10} serviços para Guarda Vidas (Q10 e TEMP/10) e {q06} serviços para área da saúde (Q06, TEMP/06 e Q11)')
 
     with col2:
         st.markdown("""
@@ -269,7 +289,7 @@ with secao4:
         x='ANO_INGRESSO',
         y='TOTAL',
         nbins=11,  # Número de bins (ajuste conforme necessário)
-        title='Distribuição dos RAS por Ano de Ingresso na Corporação',
+        title='Distribuição dos RAS por Ano de Ingresso do Militar na Corporação',
         labels={'ANO_INGRESSO': 'Ano de Ingresso'},  # Renomear rótulo do eixo x
         text_auto=True  # Mostrar os valores de cada barra
     )
@@ -283,3 +303,4 @@ with secao4:
 
     # Exibir o gráfico no Streamlit
     st.plotly_chart(histograma)
+

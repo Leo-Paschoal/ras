@@ -2,19 +2,22 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-from home import carregarDados
+#from home import carregarDados
 
 
 st.set_page_config(
     page_title='SUBCHADM',
-    layout='wide'
+    layout='wide',
+    page_icon='image.png'
 )
 
 header = st.container()
 secao1 = st.container()
 secao2 = st.container()
 
-dados = carregarDados()
+# Acessar os dados carregados
+dados = st.session_state.get("dados")
+#dados = carregarDados()
 
 
 st.sidebar.markdown("# Filtros")
@@ -24,10 +27,12 @@ st.sidebar.markdown("# Filtros")
 # verifica na planilha quais valores existem 
 setores = dados["SETOR"].unique()
 ano = dados['ANO'].unique()
+mes = dados['MES'].unique()
 
 # cria os botões de multipla seleção
 lista_setores = st.sidebar.multiselect("Setores", setores, placeholder="Selecione o Setor")
 lista_ano = st.sidebar.multiselect("Anos", ano, placeholder="Selecione o Ano")
+lista_mes = st.sidebar.multiselect("Mes", mes, placeholder="Selecione o Mês")
 
 # filtra de acordo com o selecionado
 if lista_setores:
@@ -35,6 +40,9 @@ if lista_setores:
 
 if lista_ano:
     dados = dados[dados['ANO'].isin(lista_ano)]
+
+if lista_mes:
+    dados = dados[dados['MES'].isin(lista_mes)]
 
 
 
@@ -146,6 +154,9 @@ with secao2:
     # Redefinir o índice do DataFrame para remover a coluna de índice
     df_top_unidades = df_top_unidades.reset_index(drop=True)
     
+    if "top_custos" not in st.session_state:
+        st.session_state["top_custos"] = df_top_unidades
+
     st.dataframe(df_top_unidades, column_config={
         "CUSTOS": 
                 st.column_config.ProgressColumn("Porcentagem", 
