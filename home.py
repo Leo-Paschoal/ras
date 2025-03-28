@@ -16,7 +16,7 @@ st.set_page_config(
 def carregarDados():
     #df =pd.read_csv("./dadosComp/dadosCompletos.csv")
     #df = pd.read_excel("./dadosComp/dadosCompletos.xlsx")
-    df = pd.read_excel("dadosCompletos.xlsx")
+    df = pd.read_excel("dadosCompletos.xlsx", sheet_name='Planilha1')
 
     return df
 
